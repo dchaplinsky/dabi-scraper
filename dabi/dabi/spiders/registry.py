@@ -2,7 +2,7 @@
 from scrapy import Spider, Item, Field, Selector, FormRequest
 
 
-class Entry(Item):
+class RegistryEntry(Item):
     # №   ІДАБК   Документ    Об`єкт  Кат.    Замовник    Технічний нагляд
     number = Field()
     idabk = Field()
@@ -44,7 +44,7 @@ class RegistrySpider(Spider):
     def parse(self, response):
         s = Selector(response)
         for tr in s.xpath("//table[contains(@class, 'listTable')]//tr[not(@class)][not(@id)]"):
-            item = Entry()
+            item = RegistryEntry()
             item["number"] = tr.xpath("./td[1]/text()").extract()
             item["idabk"] = tr.xpath("./td[2]/text()").extract()
             item["document"] = tr.xpath("./td[3]/text()").extract()
