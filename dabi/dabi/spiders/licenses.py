@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from scrapy import Spider, Item, Field, Selector, Request
+from scrapy import Spider, Item, Field, Selector, Request, log
 
 
 class LicenseEntry(Item):
@@ -11,8 +11,7 @@ class LicenseEntry(Item):
     obj = Field()
     address = Field()
     start_date = Field()
-    end_Date = Field()
-    month = Field()
+    end_date = Field()
 
 
 class LicensesSpider(Spider):
@@ -25,7 +24,12 @@ class LicensesSpider(Spider):
 
     def parse(self, response):
         s = Selector(response)
-        for tr in s.xpath("//table[contains(@class, 'listTable')]//tr[not(@class)][not(@id)]"):
+        trs = s.xpath("//table[contains(@class, 'listTable')]//tr[not(@class)][not(@id)]")
+
+        if len(trs) != 50:
+            log.msg("ALARM: %s has %s items, not 50" % (response.url, len(trs)))
+
+        for tr in trs:
             item = LicenseEntry()
 
             item["number"] = tr.xpath("./td[1]/text()").extract()
@@ -35,7 +39,6 @@ class LicensesSpider(Spider):
             item["obj"] = tr.xpath("./td[5]/text()").extract()
             item["address"] = tr.xpath("./td[6]/text()").extract()
             item["start_date"] = tr.xpath("./td[7]/text()").extract()
-            item["end_Date"] = tr.xpath("./td[8]/text()").extract()
-            item["month"] = tr.xpath("./td[9]/text()").extract()
+            item["end_date"] = tr.xpath("./td[8]/text()").extract()
 
             yield item
