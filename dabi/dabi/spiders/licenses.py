@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
-from scrapy import Spider, Item, Field, Selector, Request, log
+from scrapy import Spider, Item, Field, Selector, Request
+from scrapy.contrib.loader.processor import TakeFirst
 
 
 class LicenseEntry(Item):
     # №     Вид     Ліцензія    ЄДРПОУ  Ліцензіат   Адреса  Дата    Дійсна до
-    number = Field()
-    kind = Field()
-    license = Field()
-    edrpou = Field()
-    obj = Field()
-    address = Field()
-    start_date = Field()
-    end_date = Field()
+    number = Field(input_processor=unicode.strip, output_processor=TakeFirst())
+    kind = Field(input_processor=unicode.strip, output_processor=TakeFirst())
+    license = Field(
+        input_processor=unicode.strip, output_processor=TakeFirst())
+    edrpou = Field(input_processor=unicode.strip, output_processor=TakeFirst())
+    obj = Field(input_processor=unicode.strip, output_processor=TakeFirst())
+    address = Field(
+        input_processor=unicode.strip, output_processor=TakeFirst())
+    start_date = Field(
+        input_processor=unicode.strip, output_processor=TakeFirst())
+    end_date = Field(
+        input_processor=unicode.strip, output_processor=TakeFirst())
 
 
 class LicensesSpider(Spider):
@@ -19,15 +24,17 @@ class LicensesSpider(Spider):
     allowed_domains = ["asdev.com.ua"]
 
     def start_requests(self):
-        for page in range(1, 1228):
-            yield Request(url="http://asdev.com.ua/license/list.php?&&page=%s" % page)
+        yield Request(
+            url="http://asdev.com.ua/license/list.php?&page=1",
+            meta={
+                "invalidate_cache": True
+            }
+        )
 
     def parse(self, response):
         s = Selector(response)
-        trs = s.xpath("//table[contains(@class, 'listTable')]//tr[not(@class)][not(@id)]")
-
-        if len(trs) != 50:
-            log.msg("ALARM: %s has %s items, not 50" % (response.url, len(trs)))
+        trs = s.xpath("//table[contains(@class, 'listTable')]"
+                      "//tr[not(@class)][not(@id)]")
 
         for tr in trs:
             item = LicenseEntry()
@@ -42,3 +49,14 @@ class LicensesSpider(Spider):
             item["end_date"] = tr.xpath("./td[8]/text()").extract()
 
             yield item
+
+        max_page = int(
+            s.xpath("//div[@id='pages']/a/@href").re("page=(\d*)")[-1])
+
+        for page in range(2, max_page + 1):
+            yield Request(
+                url="http://asdev.com.ua/license/list.php?&page=%s" % page,
+                meta={
+                    "invalidate_cache": page == max_page
+                }
+            )

@@ -13,14 +13,12 @@ BOT_NAME = 'dabi'
 SPIDER_MODULES = ['dabi.spiders']
 NEWSPIDER_MODULE = 'dabi.spiders'
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'dabi (+http://www.yourdomain.com)'
-
 HTTPCACHE_ENABLED = True
-USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+USER_AGENT = 'DABI crawler bot (https://github.com/dchaplinsky/dabi-scraper)'
 DOWNLOAD_DELAY = 1
 CONCURRENT_REQUESTS = 1
-CONCURRENT_ITEMS = 1
+CONCURRENT_ITEMS = 100
 CONCURRENT_REQUESTS_PER_DOMAIN = 1
 
 HTTPCACHE_IGNORE_HTTP_CODES = [403, 404, 500, 503]
+HTTPCACHE_POLICY = "dabi.cache.ItemNumbersMetaDummyPolicy"
