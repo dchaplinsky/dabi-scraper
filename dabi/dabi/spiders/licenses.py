@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 from scrapy import Spider, Item, Field, Selector, Request
-from scrapy.contrib.loader.processor import TakeFirst
+from dabi.items import TakeFirstItemLoader
 
 
 class LicenseEntry(Item):
     # №     Вид     Ліцензія    ЄДРПОУ  Ліцензіат   Адреса  Дата    Дійсна до
-    number = Field(input_processor=unicode.strip, output_processor=TakeFirst())
-    kind = Field(input_processor=unicode.strip, output_processor=TakeFirst())
-    license = Field(
-        input_processor=unicode.strip, output_processor=TakeFirst())
-    edrpou = Field(input_processor=unicode.strip, output_processor=TakeFirst())
-    obj = Field(input_processor=unicode.strip, output_processor=TakeFirst())
-    address = Field(
-        input_processor=unicode.strip, output_processor=TakeFirst())
-    start_date = Field(
-        input_processor=unicode.strip, output_processor=TakeFirst())
-    end_date = Field(
-        input_processor=unicode.strip, output_processor=TakeFirst())
+    number = Field()
+    kind = Field()
+    license = Field()
+    edrpou = Field()
+    obj = Field()
+    address = Field()
+    start_date = Field()
+    end_date = Field()
 
 
 class LicensesSpider(Spider):
@@ -37,18 +33,18 @@ class LicensesSpider(Spider):
                       "//tr[not(@class)][not(@id)]")
 
         for tr in trs:
-            item = LicenseEntry()
+            item = TakeFirstItemLoader(item=LicenseEntry(), selector=tr)
 
-            item["number"] = tr.xpath("./td[1]/text()").extract()
-            item["kind"] = tr.xpath("./td[2]/text()").extract()
-            item["license"] = tr.xpath("./td[3]/text()").extract()
-            item["edrpou"] = tr.xpath("./td[4]/text()").extract()
-            item["obj"] = tr.xpath("./td[5]/text()").extract()
-            item["address"] = tr.xpath("./td[6]/text()").extract()
-            item["start_date"] = tr.xpath("./td[7]/text()").extract()
-            item["end_date"] = tr.xpath("./td[8]/text()").extract()
+            item.add_xpath("number", "./td[1]/text()")
+            item.add_xpath("kind", "./td[2]/text()")
+            item.add_xpath("license", "./td[3]/text()")
+            item.add_xpath("edrpou", "./td[4]/text()")
+            item.add_xpath("obj", "./td[5]/text()")
+            item.add_xpath("address", "./td[6]/text()")
+            item.add_xpath("start_date", "./td[7]/text()")
+            item.add_xpath("end_date", "./td[8]/text()")
 
-            yield item
+            yield item.load_item()
 
         max_page = int(
             s.xpath("//div[@id='pages']/a/@href").re("page=(\d*)")[-1])
