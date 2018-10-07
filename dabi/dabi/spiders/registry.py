@@ -5,7 +5,7 @@ import datetime
 
 
 class RegistryEntry(Item):
-    # №   ІДАБК   Документ    Об`єкт  Кат.    Замовник    Технічний нагляд
+    # №   ІДАБК   Документ    Об`єкт  Кат.    Замовник    Технічний нагляд    Проектувальник    Авторський нагляд    Підрядник    Інформація про земельну ділянку 
     number = Field()
     idabk = Field()
     document = Field()
@@ -13,19 +13,24 @@ class RegistryEntry(Item):
     cat = Field()
     customer = Field()
     tech_oversee = Field()
+    designer = Field()
+    authors_oversee = Field()
+    contractor = Field()
+    land_plot_info = Field()
     year = Field()
     month = Field()
+    
 
 
 class RegistrySpider(Spider):
     name = "registry"
-    allowed_domains = ["asdev.com.ua"]
+    allowed_domains = ["91.205.16.115"]
 
     def start_requests(self):
         now = datetime.datetime.now()
 
         for region in range(1, 28) + [99]:
-            for year in range(2011, 2016):
+            for year in range(2011, 2019):
                 for month in range(1, 13):
                     invalidate = (year == now.year and month == now.month)
                     yield self._build_request(
@@ -35,7 +40,7 @@ class RegistrySpider(Spider):
 
     def _build_request(self, region, year, month, page, invalidate_cache):
         return FormRequest(
-            url="http://asdev.com.ua/dabi/list.php?sort=num&order=DESC&page=%s" % page,
+            url="http://91.205.16.115/declarate/list.php?sort=num&order=DESC&page=%s" % page,
             formdata={
                 'filter[regob]': str(region),
                 'filter[date]': str(year),
@@ -62,6 +67,10 @@ class RegistrySpider(Spider):
             item.add_xpath("cat", "./td[5]/text()")
             item.add_xpath("customer", "./td[6]/text()")
             item.add_xpath("tech_oversee", "./td[7]/text()")
+            item.add_xpath("designer", "./td[8]/text()")
+            item.add_xpath("authors_oversee", "./td[9]/text()")
+            item.add_xpath("contractor", "./td[10]/text()")
+            item.add_xpath("land_plot_info", "./td[11]/text()")
 
             item.add_value("year", unicode(response.meta["year"]))
             item.add_value("month", unicode(response.meta["month"]))

@@ -17,11 +17,11 @@ class LicenseEntry(Item):
 
 class LicensesSpider(Spider):
     name = "licenses"
-    allowed_domains = ["asdev.com.ua"]
+    allowed_domains = ["dabi.gov.ua"]   
 
     def start_requests(self):
         yield Request(
-            url="http://asdev.com.ua/license/list.php?&page=1",
+            url="https://dabi.gov.ua/license/list.php?&&page=1",
             meta={
                 "invalidate_cache": True
             }
@@ -51,7 +51,7 @@ class LicensesSpider(Spider):
 
         for page in range(2, max_page + 1):
             yield Request(
-                url="http://asdev.com.ua/license/list.php?&page=%s" % page,
+                url="https://dabi.gov.ua/license/list.php?&&page=%s" % page,
                 meta={
                     "invalidate_cache": page == max_page
                 }
