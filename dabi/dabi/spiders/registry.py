@@ -24,7 +24,7 @@ class RegistryEntry(Item):
 
 class RegistrySpider(Spider):
     name = "registry"
-    allowed_domains = ["91.205.16.115"]
+    allowed_domains = ["dabi.gov.ua"]
 
     def start_requests(self):
         now = datetime.datetime.now()
@@ -32,7 +32,8 @@ class RegistrySpider(Spider):
         for region in range(1, 28) + [99]:
             for year in range(2011, 2019):
                 for month in range(1, 13):
-                    invalidate = (year == now.year and month == now.month)
+                    invalidate = (year == now.year and month >= now.month - 2)
+
                     yield self._build_request(
                         region, year, month, page=1,
                         invalidate_cache=invalidate
@@ -40,7 +41,7 @@ class RegistrySpider(Spider):
 
     def _build_request(self, region, year, month, page, invalidate_cache):
         return FormRequest(
-            url="http://91.205.16.115/declarate/list.php?sort=num&order=DESC&page=%s" % page,
+            url="https://dabi.gov.ua/declarate/list.php?sort=num&order=DESC&page=%s" % page,
             formdata={
                 'filter[regob]': str(region),
                 'filter[date]': str(year),
@@ -88,5 +89,5 @@ class RegistrySpider(Spider):
                     year=response.meta["year"],
                     month=response.meta["month"],
                     page=page,
-                    invalidate_cache=False
+                    invalidate_cache=response.meta["invalidate_cache"]
                 )

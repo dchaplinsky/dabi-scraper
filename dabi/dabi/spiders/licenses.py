@@ -53,6 +53,6 @@ class LicensesSpider(Spider):
             yield Request(
                 url="https://dabi.gov.ua/license/list.php?&&page=%s" % page,
                 meta={
-                    "invalidate_cache": page == max_page
+                    "invalidate_cache": page in [max_page - i for i in range(50)]
                 }
             )
